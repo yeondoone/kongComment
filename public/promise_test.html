@@ -1,0 +1,35 @@
+<html>
+<head>
+    <script lang="javascript">
+       var _promise = function (param){
+          return new Promise(function(resolve, reject){
+              window.setTimeout(function(){
+                  if(param){
+                      resolve("해결 완료");
+                  }else{
+                      reject(Error("실패!!"));
+                  }
+              }, 3000)
+          }); 
+       };
+    </script>
+</head>
+<body>
+    <script lang="javascript">
+    _promise(true)
+    .then(JSON.parse)
+    .catch(function(){
+        window.alert("체이닝 중간에 에러가!!");
+    })
+    .then(function(text){
+        alert(text);
+    });
+    /*
+    .then(function(text){
+        alert(text);
+    }, function(error){
+        alert(error);
+    });*/
+    </script>
+</body>
+</html>

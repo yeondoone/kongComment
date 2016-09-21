@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+
+<script src="http://www.gstatic.com/firebasejs/3.3.0/firebase.js"></script>
+<script src="https://www.gstatic.com/firebasejs/3.3.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/3.3.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/3.3.0/firebase-database.js"></script>    
+<script src="fireinit.js"></script>
+<script src="util.js"></script>
+
+</head>
+<body>
+    <input type="text" id="txtName"><br>
+    <input type="text" id="txtContent"><br>
+    <input type="button" id="btnSubmit" value="확인"><br><br>
+    <span id="spnMessage">여기</span>
+    
+    
+    <script type="text/javascript">
+var _uid = null;
+    
+document.getElementById('btnSubmit').onclick=function(){
+
+    var name=document.getElementById('txtName').value;
+    var content=document.getElementById('txtContent').value;
+    var ref = firebase.database().ref('/Comments');
+    
+    var comments = {
+        "commentId":"commentId01", 
+        "userId":"yeondoo", 
+        "subject":"hello", 
+        "content":"content1", 
+        "imgUrl":"imgUrl1", 
+        "kakaoId":"yeondoo", 
+        "kakaoPostId":"kakaoPostId01", 
+        "kakaoPostUrl":"kakaoPostUrl01", 
+        "facebookId":"yeondoo", 
+        "facebookPostId":"www.facebook.com", 
+        "facebookPostUrl":"www.facebook.com", 
+        "postDate":getTimeStamp()
+    };
+    
+    
+   var newCommentRef = ref.push();
+    newCommentRef.set(comments)
+    .catch(function(error){
+        alert(error);
+    });
+    //alert(newCommentRef.toString());
+   // ref('/Comments/' + commentId).set({"usrName": name, "content": content});
+   // ref(commentId).set({"usrName": name, "content": content});    
+       
+}
+
+
+        
+   
+</script>
+</body>
+</html>
