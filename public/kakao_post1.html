@@ -9,9 +9,13 @@
 </head>
 <body>
 <a id="kakao-login-btn"></a>
-<a id="postN" href="" onclick=postN()>글쓰기</a>
+<button id='btnWrite'>글쓰기</button>
 <script type="text/javascript">
  var lgTo;
+ var kakaoStatus = null;    
+ var kAccessToken = null;
+ var kRefreshToken = null;
+    
     // 사용할 앱의 JavaScript 키를 설정해 주세요.
     Kakao.init('9007bc5518b9b9e31c9fd042c55a4d8d');
     // 카카오 로그인 버튼을 생성합니다.
@@ -24,18 +28,69 @@
         fail: function(err){ alert(JSON.stringify(err))}
     });
     
-  
-        function postN(){
-           alert(Kakao.Auth.getAccessToken());
-            
-            Kakao.Auth.getStatus(function(statusObj){
-                alert(statusObj.status);
-            });
-        }
-     Kakao.Auth.getStatus(function(statusObj){
-                alert(statusObj.status);
-            });
+    Kakao.Auth.setAccessToken(Kakao.Auth.getAccessToken(),true);
+    console.log(Kakao.Auth.getAccessToken());
+    console.log(Kakao.Auth.getRefreshToken());
+    
+    try{
+        Kakao.Auth.getStatus(function(statusObj){
+            console.log(statusObj.status);
+            kakaoStatus = statusObj.status;
+        }, function(err){
+            console.log(err);
+        });
+    }catch(err){
+        console.log(err);
+    }
+    
    
+    
+  
+    document.getElementById('btnWrite').onclick =    function postN(event){
+           Kakao.Auth.getStatus(function(statusObj){
+               if(statusObj.status == "not_connected"){
+                   alert('먼저 로그인이 필요합니다!');
+               }else{
+                   Kakao.API.request({
+                       url: '/v1/api/story/linkinfo',
+                       data: { url: 'http://www.kongdubu.co.kr'}
+                   }).then(function(res){
+                       return Kakao.API.request({
+                           url: '/v1/api/story/post/link',
+                           data: {link_info: res,
+                                 content: '콩사랑 글쓰기 \r\n http://www.yellowgreen.kr',
+                                 permission: 'M'}
+                       });
+                   }).then(function(res){
+                       console.log(JSON.stringify(res));
+                   }, function(err){
+                       console.log(JSON.stringify(err));
+                   });
+               }
+           });
+          
+            
+        }
+   
+function kakaoLogin(){
+    console.log('kakaoLogin');
+    Kakao.Auth.getStatus(function(statusObj){
+        kakaoStatus = statusObj.status;
+        console.log(statusObj.status);
+    });
+    
+    if(kakaoStatus == 'not_connected' || kakaoStatus == null){
+        Kakao.Auth.login({
+            success: function(authObj){
+                Kakao.Auth.getStatus(function(statusObj){
+                    kakaoStatus = statusObj.status;
+                    console.log(statusObj.status);
+                });
+            },
+            fail: function(err){ console.log(err.error);}
+        });
+    }
+}   
   
 </script>
 
