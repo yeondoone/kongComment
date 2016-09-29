@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html >
+<head>
+<meta charset="utf-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+<meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width"/>
+<title>카카오스토리에 첨부된 파일 올리기</title>
+<script src="//developers.kakao.com/sdk/js/kakao.min.js"></script>
+<script src="util.js"></script>
+<script src="events.js"></script>
+<script type='text/javascript'>
+window.onload = function(){
+    snsInit();
+    addEvent(document.getElementById('chkKakaoLogin'), 'change', kakaoLogin);
+    addEvent(document.getElementById('frmSNSComment'), 'submit', snsPost);
+    //addEvent(document.getElementById('txtSubject'), 'click', loginCheck)
+}    
+    
+function snsInit(){
+    Kakao.init('9007bc5518b9b9e31c9fd042c55a4d8d');
+}
+    
+function loginCheck(){
+    return kakaoLoginCheck();
+}
+    
+function kakaoLoginCheck(){
+    var kakaoStatus = null;
+    
+    Kakao.Auth.getStatus(function(statusObj){
+        kakaoStatus = statusObj.status;
+        console.log(kakaoStatus);
+    }, function(err){
+        console.log(err);
+    });
+    
+    
+    return kakaoStatus == 'connected' ? true : false;
+}
+    
+function kakaoLogin(){
+    var chkKakaoLogin = document.getElementById('chkKakaoLogin');
+    var kakaoStatus = null;
+    
+    if(!chkKakaoLogin.checked) return false;
+    
+    kakaoStatus = kakaoLoginCheck();
+       
+    if(kakaoStatus != 'connected'){
+        Kakao.Auth.login();
+    }
+}
+    
+function kakaoPhotoPost(){
+    attFiles = document.getElementById('fileImage').files;
+    subject = document.getElementById('txtSubject').value;
+    content = document.getElementById('content').value;
+    
+    Kakao.API.request({
+        url: '/v1/api/story/upload/multi',
+        files: attFiles       
+    }).then(function(res){
+        return Kakao.API.request({
+            url: '/v1/api/story/post/photo',
+            data: {
+                image_url_list: res,
+                content: subject + content
+            }
+        })
+    }).then(function(res){
+        return Kako.API.request({
+            url: '/v1/api/story/mystory',
+            data: {id: res.id}
+        });
+    }).then(function(res){
+        document.getElementById('post-result').innerHTML = JSON.stringify(res);
+        document.getElementById('post-image').src = res[0].original;
+    }, function(err){
+        alert(JSON.stringify(err));
+    });
+}
+    
+function snsPost(){
+    if(!kakaoLoginCheck()){
+        alert('카카오로그인 필요!!!');
+        return false;
+    }
+    
+    kakaoPhotoPost();
+}    
+</script>
+</head>
+<body>
+<form id='frmSNSComment'>    
+<input type='checkbox' id='chkKakaoLogin'>카카오로그인<br>
+제목: <input type='text' id='txtSubject'><br> 
+내용: <textarea id='content' rows='4' cols='50'></textarea><br><br>
+<input type='file' id='fileImage'><br><br>
+<button type='submit' id='btnSubmit'>글쓰기</button>
+    <br><br><br>
+<p id='post-result'></p>
+<img id='post-image' src='' />
+</form>
+</body>
+</html>
