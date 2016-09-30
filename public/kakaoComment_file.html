@@ -12,7 +12,7 @@
 window.onload = function(){
     snsInit();
     addEvent(document.getElementById('chkKakaoLogin'), 'change', kakaoLogin);
-    addEvent(document.getElementById('frmSNSComment'), 'submit', snsPost);
+    addEvent(document.getElementById('btnSubmit'), 'click', snsPost);
     //addEvent(document.getElementById('txtSubject'), 'click', loginCheck)
 }    
     
@@ -23,32 +23,33 @@ function snsInit(){
 function loginCheck(){
     return kakaoLoginCheck();
 }
+
+/*    
+function kakaoLoginCheck(callback){
+    Kakao.Auth.getStatus(function(statusObj){
+        console.log(statusObj.status);
+        callback({status: statusObj.status});
+    }); 
+}
+*/
     
-function kakaoLoginCheck(){
+
+    
+function kakaoLogin(evt){
+    //alert(evt.target);
+    //var chkKakaoLogin = document.getElementById('chkKakaoLogin');
     var kakaoStatus = null;
+    
+    //if(!chkKakaoLogin.checked) return false;
+    if(!evt.target.checked) return;
     
     Kakao.Auth.getStatus(function(statusObj){
-        kakaoStatus = statusObj.status;
-        console.log(kakaoStatus);
-    }, function(err){
-        console.log(err);
+        if(statusObj.status != 'connected'){
+            Kakao.Auth.login();
+        }
     });
     
-    
-    return kakaoStatus == 'connected' ? true : false;
-}
-    
-function kakaoLogin(){
-    var chkKakaoLogin = document.getElementById('chkKakaoLogin');
-    var kakaoStatus = null;
-    
-    if(!chkKakaoLogin.checked) return false;
-    
-    kakaoStatus = kakaoLoginCheck();
-       
-    if(kakaoStatus != 'connected'){
-        Kakao.Auth.login();
-    }
+   
 }
     
 function kakaoPhotoPost(){
@@ -64,15 +65,18 @@ function kakaoPhotoPost(){
             url: '/v1/api/story/post/photo',
             data: {
                 image_url_list: res,
-                content: subject + content
+                content: subject +'\n\n' + content +'\n\n'+'http://www.kongdubu.co.kr/shop/goods/goods_view.php?&goodsno=147', //엔터키 적용해야 함
+                permission: 'M'
             }
-        })
+        });
     }).then(function(res){
+        console.log('photo' + res.id);
         return Kako.API.request({
             url: '/v1/api/story/mystory',
             data: {id: res.id}
         });
     }).then(function(res){
+        console.log('mystory'+res);
         document.getElementById('post-result').innerHTML = JSON.stringify(res);
         document.getElementById('post-image').src = res[0].original;
     }, function(err){
@@ -80,13 +84,51 @@ function kakaoPhotoPost(){
     });
 }
     
-function snsPost(){
+function kakaoLinkPost(){
+    subject = document.getElementById('txtSubject').value;
+    content = document.getElementById('content').value;
+    Kakao.API.request({
+        url: '/v1/api/story/linkinfo',
+        data:{
+            url: 'http://www.kongdubu.co.kr/shop/goods/goods_view.php?&goodsno=147'
+        }
+    }).then(function(res){
+        //alert(JSON.stringify(res));
+        return Kakao.API.request({
+            url: '/v1/api/story/post/link',
+            data: {
+                link_info: res,
+                content:  subject +'\n\n'+ content, //엔터키 적용해야 함
+                permission: 'M'
+            }
+        }, function(err){
+            alert(err);
+        });
+    });                     
+}    
+    
+function snsPost(evt){
+    attFiles = document.getElementById('fileImage').files;
+    var chkKakao = document.getElementById('chkKakaoLogin');
+    
+    Kakao.Auth.getStatus(function(statusObj){
+        if(chkKakao.checked && statusObj.status == 'connected'){
+            if(attFiles.length > 0)
+                kakaoPhotoPost();
+            else
+                kakaoLinkPost();
+        }
+    });
+    
+    
+    /*
     if(!kakaoLoginCheck()){
         alert('카카오로그인 필요!!!');
         return false;
     }
     
     kakaoPhotoPost();
+    */
 }    
 </script>
 </head>
@@ -96,7 +138,7 @@ function snsPost(){
 제목: <input type='text' id='txtSubject'><br> 
 내용: <textarea id='content' rows='4' cols='50'></textarea><br><br>
 <input type='file' id='fileImage'><br><br>
-<button type='submit' id='btnSubmit'>글쓰기</button>
+<button type='button' id='btnSubmit'>글쓰기</button>
     <br><br><br>
 <p id='post-result'></p>
 <img id='post-image' src='' />
