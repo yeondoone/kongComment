@@ -35,21 +35,15 @@ function kakaoLoginCheck(callback){
     
 
     
-function kakaoLogin(evt){
-    //alert(evt.target);
-    //var chkKakaoLogin = document.getElementById('chkKakaoLogin');
-    var kakaoStatus = null;
-    
-    //if(!chkKakaoLogin.checked) return false;
+function kakaoLogin(evt){       
+   
     if(!evt.target.checked) return;
     
     Kakao.Auth.getStatus(function(statusObj){
         if(statusObj.status != 'connected'){
-            Kakao.Auth.login();
+           Kakao.Auth.login();
         }
     });
-    
-   
 }
     
 function kakaoPhotoPost(){
