@@ -13,7 +13,7 @@ window.onload = function(){
     snsInit();
     addEvent(document.getElementById('chkKakaoLogin'), 'change', kakaoLogin);
     addEvent(document.getElementById('btnSubmit'), 'click', snsPost);
-    //addEvent(document.getElementById('txtSubject'), 'click', loginCheck)
+    addEvent(document.getElementById('btnLogout'), 'click', kakaoLogout)
 }    
     
 function snsInit(){
@@ -45,6 +45,10 @@ function kakaoLogin(evt){
         }
     });
 }
+
+function kakaoLogout(evt){
+    Kakao.Auth.logout();
+}
     
 function kakaoPhotoPost(){
     attFiles = document.getElementById('fileImage').files;
@@ -59,7 +63,7 @@ function kakaoPhotoPost(){
             url: '/v1/api/story/post/photo',
             data: {
                 image_url_list: res,
-                content: subject +'\n\n' + content +'\n\n'+'http://www.kongdubu.co.kr/shop/goods/goods_view.php?&goodsno=147', //엔터키 적용해야 함
+                content: subject +'\n\n' + content +'\n\n'+'http://www.kongdubu.co.kr/shop/goods/goods_view.php?&goodsno=147', 
                 permission: 'M'
             }
         });
@@ -92,7 +96,7 @@ function kakaoLinkPost(){
             url: '/v1/api/story/post/link',
             data: {
                 link_info: res,
-                content:  subject +'\n\n'+ content, //엔터키 적용해야 함
+                content:  subject +'\n\n'+ content,
                 permission: 'M'
             }
         }, function(err){
@@ -133,6 +137,7 @@ function snsPost(evt){
 내용: <textarea id='content' rows='4' cols='50'></textarea><br><br>
 <input type='file' id='fileImage'><br><br>
 <button type='button' id='btnSubmit'>글쓰기</button>
+<button type='button' id='btnLogout'>카카오로그아웃</button>
     <br><br><br>
 <p id='post-result'></p>
 <img id='post-image' src='' />
