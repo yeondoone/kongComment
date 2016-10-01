@@ -13,6 +13,7 @@ window.onload = function(){
     snsInit();
     addEvent(document.getElementById('chkKakaoLogin'), 'change', kakaoLogin);
     addEvent(document.getElementById('frmSNSComment'), 'submit', snsPost);
+    addEvent(document.getElementById('btnLogout'), 'click', kakaoLogout);
     //addEvent(document.getElementById('txtSubject'), 'click', loginCheck)
 }    
     
@@ -25,36 +26,63 @@ function loginCheck(){
 }
     
 function kakaoLoginCheck(){
-    var kakaoStatus = null;
+    var kakaoStatus;
     
+    /*
     Kakao.Auth.getStatus(function(statusObj){
-        kakaoStatus = statusObj.status;
+        statusObj.status;
         console.log(kakaoStatus);
+        alert('kakaoStatus='+kakaoStatus+', statusObj.status='+statusObj.status);
+    }, function(err){
+        console.log(err);
+    });
+    */
+    alert('kakaoLoginCheck');
+    Kakao.Auth.getStatus(function(kakaoStatus){
+        this.kakaoStatus = statusObj.status;
+        console.log(kakaoStatus.status);
     }, function(err){
         console.log(err);
     });
     
-    
-    return kakaoStatus == 'connected' ? true : false;
+    alert(kakaoStatus);
 }
     
-function kakaoLogin(){
-    var chkKakaoLogin = document.getElementById('chkKakaoLogin');
-    var kakaoStatus = null;
+function kakaoLogin(evt){
+    //var chkKakaoLogin = document.getElementById('chkKakaoLogin');
+    //var kakaoStatus = null;
     
-    if(!chkKakaoLogin.checked) return false;
+    //if(!chkKakaoLogin.checked) return false;
+    if(!evt.target.checked) return false;
     
-    kakaoStatus = kakaoLoginCheck();
+    Kakao.Auth.getStatus(function(statusObj){
+        alert(statusObj.status);
+        if(statusObj.status == 'not_connected')
+            Kakao.Auth.login();
+        else
+            alert('connected');
+        //console.log(kakaoStatus);
+        //alert('kakaoStatus='+kakaoStatus+', statusObj.status='+statusObj.status);
+    }, function(err){
+        console.log(err);
+    });
+    
+    //alert(kakaoStatus);
+    
+    //if(!chkKakaoLogin.checked || kakaoStatus) return false;    
        
-    if(kakaoStatus != 'connected'){
-        Kakao.Auth.login();
-    }
+    //if(!kakaoStatus){
+    //    Kakao.Auth.login();
+    //}
 }
     
 function kakaoPhotoPost(){
+    alert('kakaoPhotoPost in');
     attFiles = document.getElementById('fileImage').files;
     subject = document.getElementById('txtSubject').value;
     content = document.getElementById('content').value;
+    
+    alert(attFiles);
     
     Kakao.API.request({
         url: '/v1/api/story/upload/multi',
@@ -64,7 +92,8 @@ function kakaoPhotoPost(){
             url: '/v1/api/story/post/photo',
             data: {
                 image_url_list: res,
-                content: subject + content
+                content: subject + content,
+                permission: 'M'
             }
         })
     }).then(function(res){
@@ -80,14 +109,20 @@ function kakaoPhotoPost(){
     });
 }
     
-function snsPost(){
-    if(!kakaoLoginCheck()){
-        alert('카카오로그인 필요!!!');
-        return false;
-    }
-    
-    kakaoPhotoPost();
-}    
+function snsPost(evt){
+    alert('snsPost');
+    Kakao.Auth.getStatus(function(statusObj){
+        alert(statusObj.status);
+        if(statusObj.status == 'connected') 
+           alert(statusObj.status);// kakaoPhotoPost();        
+    });
+}  
+
+function kakaoLogout(){
+    Kakao.Auth.logout();
+    alert('로그아웃 되었습니다!');
+}
+
 </script>
 </head>
 <body>
@@ -97,6 +132,7 @@ function snsPost(){
 내용: <textarea id='content' rows='4' cols='50'></textarea><br><br>
 <input type='file' id='fileImage'><br><br>
 <button type='submit' id='btnSubmit'>글쓰기</button>
+<button type='button' id='btnLogout'>로그아웃</button>
     <br><br><br>
 <p id='post-result'></p>
 <img id='post-image' src='' />
