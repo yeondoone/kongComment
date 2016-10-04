@@ -4,9 +4,19 @@
 <meta charset="utf-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width"/>
+<script src="util.js"></script>
+<script src="events.js"></script>
+<script type="text/javascript">
+window.onload=function(){
+    //addEvent(document.getElementById('chkFBLogin'), 'click', fbLogin );
+    //addEvent(document.getElementById('btnSubmit'), 'click', fbPost);
+}    
+</script>
 </head>
 <body onload="printStatus();">
 <script>
+
+    
   // This is called with the results from from FB.getLoginStatus().
   function statusChangeCallback(response) {
     console.log('statusChangeCallback');
@@ -52,7 +62,7 @@ function checkLoginState() {
      var js, fjs = d.getElementsByTagName(s)[0];
      if (d.getElementById(id)) {return;}
      js = d.createElement(s); js.id = id;
-     js.src = "//connect.facebook.net/en_US/sdk.js";
+     js.src = "//connect.facebook.net/kr_KO/sdk.js";
      fjs.parentNode.insertBefore(js, fjs);
    }(document, 'script', 'facebook-jssdk'));
     
@@ -67,23 +77,86 @@ function testAPI() {
     
 function fbLogout(){
     FB.logout(function(res){
-       // document.getElementById('status').innerHTML = '바이! 페북';
+       location.reload(false);
+        testAPI();
     });
+    
+}
+    
+function fbLogin(evt){
+    //alert('로긴');
+    if(!document.getElementById('chkFBLogin').checked) return;
+    
+    FB.getLoginStatus(function(res){
+        if(res.status !== 'connected'){
+            FB.login(function(response){
+                testAPI();
+            },  {
+                    scope: 'publish_actions',
+                    return_scopes: true
+            });    
+        }
+    });   
 }
     
 function printStatus(){
     checkLoginState();
 }
+ 
+    
+function fbPost(){
+//alert('fbPost');
+   subject = document.getElementById('txtSubject').value;
+    content = document.getElementById('content').value;
+    
+    content = subject + '\n' + content;
+    console.log(content);
+   
+    FB.getLoginStatus(function(res){
+        console.log(res.status);
+        if(res.status === 'connected'){
+            FB.api('/me/feed', 'POST', {message: content, privacy: {value: 'SELF'} }, function(response){
+                if(!response || response.error){
+                    alert(JSON.stringify(response));
+                }else{
+                    alert('successful with id [' + response.id + ']');
+                    console.log(JSON.stringify(response));
+                }
+            });
+        }
+    });
+}
+    
+function fbPost2(){
+    console.log('fbPost2');
+    FB.api(
+  '/me/feed',
+  'POST',
+  {message:"Helloe4!!", privacy: {value: 'SELF'}},
+  function(response) {
+       if(!response || response.error){
+                    alert(JSON.stringify(response));
+                }else{
+                    alert('successful with id [' + response.id + ']');
+                    console.log(JSON.stringify(response));
+  }
+  });
+
+}
+
+
 </script>
-<div
-  class="fb-like"
-  data-share="true"
-  data-width="450"
-  data-show-faces="true">
-</div>
 
 <fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
 </fb:login-button><br>
+<input type='checkbox' id='chkFBLogin'  onchange='fbLogin();'>페북로그인<br>
+제목: <input type='text' id='txtSubject'><br> 
+내용: <textarea id='content' rows='4' cols='50'></textarea><br><br>
+<input type='file' id='fileImage'><br><br>
+<button type='button' id='btnSubmit' onclick='fbPost();'>글쓰기</button>
+    <br><br><br>
+<p id='post-result'></p>
+<img id='post-image' src='' />
 <button id='btnFBLogout' onclick='fbLogout();'>페북로그아웃</button>
 
 <div id="status">
