@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>파일 첨부</title>
+<script type='text/javascript'>
+function previewFile() {
+  var preview = document.querySelector('img');
+  var file    = document.querySelector('input[type=file]').files[0];
+  var reader  = new FileReader();
+
+  reader.addEventListener("load", function () {
+    preview.src = reader.result;
+  }, false);
+
+  if (file) {
+    reader.readAsDataURL(file);
+  }
+}
+    
+function getImage(){
+ var preview = document.querySelector('img');
+  var file   =document.createElement('img').src='http://yeondoone1.godomall.com/data/goods/16/10/40/1000000000/1000000000_detail_043.JPG';
+  
+  var reader  = new FileReader();
+
+  reader.addEventListener("load", function () {
+    preview.src = reader.result;
+  }, false);
+    
+    if(file){
+        reader.readAsDataURL(file);
+    }    
+}    
+</script>
+</head>
+<body>
+<input type="file" onchange="previewFile()"><br>
+<button type='button' onclick='getImage'>이미지가져오기</button>
+<img src="" height="200" alt="Image preview...">
+
+</body>
+</html>
