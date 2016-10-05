@@ -1,0 +1,241 @@
+{*** 상품상세 - 상품 문의/후기 작성 | goods/goods_board_write.php ***}
+<!-- 상품 문의/후기 작성 레이어 -->
+<div class="review-write-layer">
+    <div class="wrap">
+        <h4>{bdWrite.cfg.bdNm} 쓰기</h4>
+
+        <form name="frmWrite" target="ifrmProcess" id="frmWrite" action="../board/board_ps.php" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="gboard" value="y">
+            <input type="hidden" name="bdId" value="{=bdWrite.cfg.bdId}">
+            <input type="hidden" name="sno" value="{=gd_isset(req.sno)}">
+            <input type="hidden" name="mode" value="{=gd_isset(req.mode)}">
+            <input type="hidden" name="goodsNo" value="{=gd_isset(req.goodsNo)}">
+            <input type="hidden" name="returnUrl" value="{=queryString}">
+			<input type="hidden" id="hidImgs"> <!--업로드 할 이미지 파일들-->
+            <!--{ ? oldPassword}--><input type="hidden" name="oldPassword" value="{=oldPassword}"><!--{/}-->
+            <fieldset>
+                <legend>상품 문의/후기 작성 폼</legend>
+                <div class="scroll-box">
+                    <div class="goods">
+                        <div class="thumbnail">
+                            {goodsView['image']['detail']['img'][0]}
+                        </div>
+                        <div class="txt">
+
+                            <h2>{=gd_isset(goodsView['goodsNmDetail'])}</h2>
+                            <!--{ ? gd_isset(goodsView['shortDescription']) }-->
+                            <p>{=goodsView['shortDescription']}</p>
+                            <!--{ / }-->
+
+                        </div>
+                    </div>
+                    <div class="board-write">
+                        <table summary="글쓰기 폼입니다." cellpadding="0" border="1">
+                            <colgroup>
+                                <col width="11%"/>
+                                <col/>
+                            </colgroup>
+                            <!--{? bdWrite.cfg.bdCategoryFl == 'y'}-->
+                            <tr>
+                                <th>말머리</th>
+                                <td>
+                                    {=gd_select_box('category', 'category', bdWrite.cfg.arrCategory, null, gd_isset(bdWrite.data.category), null, 'style="width:
+                                    127px;"','tune')}
+                                </td>
+                            </tr>
+                            <!--{/}-->
+                            <tr>
+                                <th>작성자</th>
+                                <td>
+                                    <!--{? bdWrite.data.writerNm}-->
+                                    {=gd_isset(bdWrite.data.writerNm)}
+                                    <input type="hidden" name="writerNm" value="{=gd_isset(bdWrite.data.writerNm)}"/>
+                                    <!--{:}-->
+                                    <input type="text" name="writerNm" value="{=gd_isset(bdWrite.data.writerNm)}" class="text" title="작성자 입력"/>
+                                    <!--{/}-->
+                                </td>
+                            </tr>
+                            <!--{?  !gd_isset(bdWrite.data.memNo) && !oldPassword}-->
+                            <tr>
+                                <th>비밀번호</th>
+                                <td>
+                                    <input type="password" name="writerPw" class="text" title="비밀번호 입력"/>
+                                </td>
+                            </tr>
+                            <!--{/}-->
+                            <!--{? bdWrite.cfg.bdGoodsPtFl == 'y'}-->
+                            <tr>
+                                <th>평가</th>
+                                <td>
+                                    <ul class="choice-rating">
+                                        <!--{@ range(5,1)}-->
+                                        <li>
+                                            <label for="rating{.value_}" <!--{ ? bdWrite.data.goodsPt == .value_ }-->class="on"<!--{/}-->><span class="rating">
+                                                <span style="width:{.value_*20}%;">별{.value_}</span></span>
+                                            </label>
+                                            <input type="radio" name="goodsPt" value="{.value_}" class="radio" id="rating{.value_}" name="rating"
+                                            <!--{ ? bdWrite.data.goodsPt == .value_ }-->checked<!--{/}-->/>
+                                        </li>
+                                        <!--{/}-->
+                                    </ul>
+                                </td>
+                            </tr>
+                            <!--{/}-->
+                            <!--{? bdWrite.cfg.bdMobileFl == 'y' }-->
+                            <tr>
+                                <th>휴대폰</th>
+                                <td>
+                                    <div class="txt-field hs" style="width:290px;">
+                                        <input type="text" name="writerMobile" value="{=gd_isset(bdWrite.data.writerMobile)}" id="time" class="text" placeholder="- 없이 입력하세요">
+                                    </div>
+                                </td>
+                            </tr>
+                            <!--{/}-->
+                            <!--{? bdWrite.cfg.bdEmailFl == 'y' }-->
+                            <tr>
+                                <th>이메일</th>
+                                <td>
+                                    <input type="text" name="writerEmail" value="{=gd_isset(bdWrite.data.writerEmail)}" class="text" style="width:187px;" placeholder="이메일  입력"/>
+                                </td>
+                            </tr>
+                            <!--{/}-->
+                            <tr>
+                                <th>제목</th>
+                                <td>
+                                    <input type="text" class="text" name="subject" style="width:92%" placeholder="제목 입력" value="{=gd_isset(bdWrite.data.subject)}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>내용</th>
+                                <td>
+                                    <div class="check-secret">
+                                        <!--{? bdWrite.cfg.bdSecretFl : '1'}-->
+                                        <input type="checkbox" name="isSecret" value="y" id="secret" class="checkbox" checked/>
+                                        <label for="secret" class="check-s on">비밀글</label>
+                                        <!--{: '2'}-->
+                                        <!--{: '3'}-->
+                                        해당글은 비밀글로만 작성이 됩니다.
+                                        <!--{:}-->
+                                        <!--{? req.mode == 'reply' && gd_isset(bdWrite.data.isSecret) == 'y'}-->    <!--// 비밀글 설정 - 부모글이 비밀글인 답글 작성시 무조건 비밀글-->
+                                        <input type="hidden" name="isSecret" value="y"/> 해당글은 비밀글로만 작성이 됩니다.
+                                        <label for="secret" class="check-s on">비밀글</label>
+                                        <!--{:}-->
+                                        <input type="checkbox" name="isSecret" value="y" id="secret" class="checkbox" <!--{? gd_isset(bdWrite.data.isSecret) == 'y'}-->checked
+                                        <!--{/}--> />
+                                        <label for="secret" class="check-s  <!--{? gd_isset(bdWrite.data.isSecret) == 'y'}-->on<!--{/}-->">비밀글</label>
+                                        <!--{/}-->
+                                        <!--{/}-->
+                                    </div>
+                                    <textarea title="내용 입력" id="editor" style="width:550px" name="contents" cols="50" rows="3">{=bdWrite.data.contents}</textarea>
+                                </td>
+                            </tr>
+                            <!--{? bdWrite.cfg.bdUploadFl == 'y'}-->
+                            <tr>
+                                <th>파일</th>
+                                <td id="uploadBox">
+                                    <!--{ @ bdWrite.data.uploadFileNm }-->
+                                    <div class="file-upload" style="margin-top:5px">
+                                        <label for="attach{=.index_+1}"><input type="text" class="text" title="피일 첨부하기" readonly="readonly"/></label>
+
+                                        <div class="upload-btn">
+                                            <button type="button" class="img-upload skinbtn base2 boarddwrite-uploadfile" title="찾아보기"><em>찾아보기</em></button>
+                                            <input type="file" name="upfiles[]" id="attach{=.index_+1}" class="file" title="찾아보기"/>
+                                        </div>
+                                        &nbsp;
+                                        <input type="checkbox" name="delFile[{=.index_}]" value="y"/> Delete.. <a
+                                            href="../board/download.php?bdId={req.bdId}&sno={req.sno}&fid={.index_}">{=.value_}</a>
+                                    </div>
+                                    <!--{/}-->
+                                    <div class="file-upload" style="margin-top:5px">
+                                        <label for="attach"><input type="text" class="text" title="피일 첨부하기" readonly="readonly"/></label>
+
+                                        <div class="upload-btn">
+                                            <button type="button" class="img-upload skinbtn base2 boarddwrite-uploadfile" title="찾아보기"><em>찾아보기</em></button>
+                                            <input type="file" name="upfiles[]" id="attach" class="file" title="찾아보기"/>
+                                            <button type="button" class="normal-btn small1 boarddwrite-addupload" id="addUploadBtn" style="position:relative"><em>+ 추가</em></button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!--{/}-->
+                            <!--{? bdWrite.cfg.bdSpamBoardFl&2 }-->
+                            <tr>
+                                <th>자동등록방지</th>
+                                <td>
+                                    <div class="capcha">
+                                        <div class="capcha-img">
+                                            <img src="../board/captcha.php" align="absmiddle" id="captchaImg"/>
+                                            <!--<img src="../../img/etc/@capcha-img.png" alt="">-->
+                                        </div>
+                                        <div class="capcha-body">
+                                            <div class="capcha-text">
+                                                <p class="pre">보이는 순서대로 <br/>숫자 및 문자를 모두 입력해 주세요.</p>
+                                            </div>
+                                            <div class="txt-field hs" style="width:105px;">
+                                                <input type="text" class="text captcha" name="captchaKey" maxlength="5"
+                                                       onKeyUp="javascript:this.value=this.value.toUpperCase();" onfocus="this.select()" label="자동등록방지문자">
+                                            </div>
+                                            <button type="button" onclick="captchaReload()" class="normal-btn small1 captchareload"><em><img
+                                                    src="../img/etc/icon-reset.png" alt="" class="va-m"> 이미지 새로고침</em>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!--{/}-->
+                        </table>
+                    </div>
+                    <!--{? bdWrite.cfg.bdPrivateYN == "y"}-->
+                    <div class="privacy">
+                        <h5>비회원 개인정보 수집동의</h5>
+                        <div class="terms" style="overflow:scroll">{=bdWrite.private}</div>
+                        <div class="consent">
+                            <label for="qnaPrivacyAgree">위 내용에 동의합니다.</label>
+                            <input type="checkbox" name="private" value="y" class="checkbox" id="qnaPrivacyAgree"/>
+                            <a href="../service/private.php" target="_blank" class="c-red fz11 td-u">전체보기&gt;</a>
+                        </div>
+                    </div>
+                    <!--{/}-->
+                </div>
+                <div class="btn">
+                    <a href="javascript:writerLayer.close()" class="skinbtn point1 layerboard-close"><em>취소</em></a>
+                    <a href="javascript:save()" class="skinbtn point2 layerboard-save"><em>등록</em></a>
+                </div>
+            </fieldset>
+        </form>
+        <button type="button" class="close" title="닫기">닫기</button>
+    </div>
+</div>
+
+
+<!-- //추가된 첨부파일 -->
+<script type="text/template" class="template">
+    <div class="file-upload" style="margin-top:5px">
+        <label for="attach<%=idx%>"><input type="text" class="text" title="파일 첨부하기" readonly="readonly"/></label>
+
+        <div class="upload-btn">
+            <button type="button" class="img-upload skinbtn base2 boarddwrite-uploadfile" title="찾아보기"><em>찾아보기</em></button>
+            <input type="file" id="attach<%=idx%>" class="file" name="upfiles[]" title="찾아보기"/>
+            <button type="button" onclick="uploadRemove(this)" class="normal-btn small1 uploadremove" style="position:relative"><em>- 삭제</em></button>
+        </div>
+    </div>
+</script>
+
+<script>
+    var mode = '{=req.mode}';
+    var cfgUploadFl = '{=bdWrite.cfg.bdUploadFl}';
+    var cfgEditorFl = '{=bdWrite.cfg.bdEditorFl}';
+
+    function save() {
+        $('#frmWrite').submit();
+    }
+</script>
+<script type="text/javascript" src="\{=c.PATH_SKIN}js/gd_board_write.js" charset="utf-8"></script>
+<!--{ ? bdWrite.cfg.bdEditorFl == 'y'}-->
+<script type="text/javascript">
+    var editorPath = '{=c.PATH_SKIN}js/smart';
+</script>
+<script type="text/javascript" src="\{=c.PATH_SKIN}js/smart/js/HuskyEZCreator.js"></script>
+<script type="text/javascript" src="\{=c.PATH_SKIN}js/smart/js/editorLoad.js"></script>
+<script type="text/javascript" src="\{=c.PATH_SKIN}js/snscomment/sns_comment.js"></script>
+<!--{/}-->
